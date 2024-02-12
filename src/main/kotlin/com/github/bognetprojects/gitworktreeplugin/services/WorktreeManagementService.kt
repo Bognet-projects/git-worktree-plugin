@@ -30,12 +30,18 @@ class WorktreeManagementService(project: Project) {
     }
 
     private fun getWorktreePath(): List<String> {
-        var command = "git worktree list"
-        if (!os.lowercase(Locale.getDefault()).startsWith("win")) command = arrayOf("/bin/sh", "-c", command).toString()
-        var list: List<String> = listOf()
+        val list = executeCommand("git worktree list")
+        paths = list.map { Path(it.split(" ")[0]) }
+        return list.map { it.substringAfter("[").substringBefore("]") }
+    }
+
+    private fun executeCommand(command: String, wait: Long = 5): List<String> {
+        var commandString = command
+        var result: List<String> = listOf()
+        if (!os.lowercase(Locale.getDefault()).startsWith("win")) commandString = arrayOf("/bin/sh", "-c", command).toString()
         try {
-            val process: Process = runtime.exec(command, null, projectPath.toFile())
-            process.waitFor(5, TimeUnit.SECONDS)
+            val process: Process = runtime.exec(commandString, null, projectPath.toFile())
+            process.waitFor(wait, TimeUnit.SECONDS)
 
             val reader = BufferedReader(InputStreamReader(process.inputStream))
             val output = StringBuilder()
@@ -45,9 +51,8 @@ class WorktreeManagementService(project: Project) {
             }
             process.destroy()
             reader.close()
-            list = output.split("\n").map { it.substringAfter("[").substringBefore("]") }
-            paths = output.split("\n").map { Path(it.split(" ")[0]) }
+            result = output.split("\n").dropLast(1)
         } catch (_: IOException) {}
-        return list
+        return result
     }
 }
