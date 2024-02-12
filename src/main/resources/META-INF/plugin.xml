@@ -1,15 +1,15 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.bognetprojects.gitworktreeplugin</id>
-    <name>git-worktree-plugin Template</name>
-    <vendor>bognet-projects</vendor>
+    <name>Git Worktree</name>
+    <vendor>Balazs Bognar</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.bognetprojects.gitworktreeplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <toolWindow factoryClass="com.github.bognetprojects.gitworktreeplugin.toolWindow.WorkTreeWindowFactory" id="Worktree 🌳"/>
     </extensions>
 
     <applicationListeners>
