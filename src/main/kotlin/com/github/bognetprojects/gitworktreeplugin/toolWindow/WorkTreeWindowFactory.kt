@@ -8,6 +8,7 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.ui.content.ContentFactory
 import com.github.bognetprojects.gitworktreeplugin.services.WorktreeManagementService
 import com.intellij.ui.components.JBList
+import javax.swing.JButton
 
 
 class WorkTreeWindowFactory : ToolWindowFactory {
@@ -25,13 +26,17 @@ class WorkTreeWindowFactory : ToolWindowFactory {
         private val service = toolWindow.project.service<WorktreeManagementService>()
 
         fun getContent() = JBPanel<JBPanel<*>>().apply {
+            val button = JButton("Switch").apply {
+                addActionListener { service.switchToWorktree() }
+            }
             val worktreeList = JBList(service.worktreeList).apply {
                 addListSelectionListener {
-                    service.selected = selectedValue
+                    service.selected = selectedIndex
                 }
             }
             worktreeList.selectionModel.selectionMode = 0
             add(worktreeList)
+            add(button)
         }
     }
 }

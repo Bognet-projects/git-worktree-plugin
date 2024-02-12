@@ -1,24 +1,32 @@
 package com.github.bognetprojects.gitworktreeplugin.services
 
+import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.io.path.Path
 
 @Service(Service.Level.PROJECT)
 class WorktreeManagementService(project: Project) {
-    val worktreeList: List<String>
-    var selected: String = ""
+    var worktreeList: List<String>
+    var selected: Int = 0
     private val runtime = Runtime.getRuntime()
     private val projectPath = Paths.get(project.basePath!!)
     private val os = System.getProperty("os.name")
+    private lateinit var paths: List<Path>
 
     init {
         worktreeList = getWorktreePath()
+    }
+
+    fun switchToWorktree() {
+        ProjectUtil.openOrImport(paths[selected], null, true)
     }
 
     private fun getWorktreePath(): List<String> {
@@ -38,6 +46,7 @@ class WorktreeManagementService(project: Project) {
             process.destroy()
             reader.close()
             list = output.split("\n").map { it.substringAfter("[").substringBefore("]") }
+            paths = output.split("\n").map { Path(it.split(" ")[0]) }
         } catch (_: IOException) {}
         return list
     }
