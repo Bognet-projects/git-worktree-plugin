@@ -2,6 +2,7 @@ package com.github.bognetprojects.gitworktreeplugin.services
 
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import java.io.BufferedReader
 import java.io.IOException
@@ -16,6 +17,7 @@ import kotlin.io.path.Path
 class WorktreeManagementService(project: Project) {
     var worktreeList: List<String>
     var selected: Int = 0
+    private val branchList: List<String>
     private val runtime = Runtime.getRuntime()
     private val projectPath = Paths.get(project.basePath!!)
     private val os = System.getProperty("os.name")
@@ -23,10 +25,21 @@ class WorktreeManagementService(project: Project) {
 
     init {
         worktreeList = getWorktreePath()
+        branchList = executeCommand("git branch -a", 20)
+        thisLogger().warn(projectPath.toString())
     }
 
     fun switchToWorktree() {
         ProjectUtil.openOrImport(paths[selected], null, true)
+    }
+
+    fun getBranchList(): List<String> {
+        return branchList
+    }
+
+    fun addToWorktree(branchName: String) {
+        executeCommand("git worktree add ../$branchName $branchName")
+        worktreeList = getWorktreePath()
     }
 
     private fun getWorktreePath(): List<String> {
