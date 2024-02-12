@@ -42,6 +42,12 @@ class WorktreeManagementService(project: Project) {
         worktreeList = getWorktreePath()
     }
 
+    fun removeWorktree() {
+        val branchName = worktreeList[selected]
+        executeCommand("git worktree remove $branchName")
+        worktreeList = getWorktreePath()
+    }
+
     private fun getWorktreePath(): List<String> {
         val list = executeCommand("git worktree list")
         paths = list.map { Path(it.split(" ")[0]) }

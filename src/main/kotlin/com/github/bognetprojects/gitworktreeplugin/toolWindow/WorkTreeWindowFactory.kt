@@ -9,7 +9,6 @@ import com.intellij.ui.content.ContentFactory
 import com.github.bognetprojects.gitworktreeplugin.services.WorktreeManagementService
 import com.intellij.ui.components.JBList
 import com.intellij.ui.dsl.builder.panel
-import javax.swing.JButton
 
 
 class WorkTreeWindowFactory : ToolWindowFactory {
@@ -27,11 +26,24 @@ class WorkTreeWindowFactory : ToolWindowFactory {
         private val service = toolWindow.project.service<WorktreeManagementService>()
 
         fun getContent() = JBPanel<JBPanel<*>>().apply {
-            val buttonSwitch = JButton("Switch").apply {
-                addActionListener { service.switchToWorktree() }
-            }
-            val worktreeList: JBList<*> = getList()
+            var worktreeList: JBList<String> = getList()
             worktreeList.selectionModel.selectionMode = 0
+
+            val buttons = panel {
+                row {
+                    button("Switch") {
+                        service.switchToWorktree()
+                    }
+                    button("Remove") {
+                        service.removeWorktree()
+                        remove(worktreeList)
+                        worktreeList = getList()
+                        add(worktreeList)
+                        revalidate()
+                        updateUI()
+                    }
+                }
+            }
 
             val branches = panel {
                 row("Branches") {
@@ -39,7 +51,8 @@ class WorkTreeWindowFactory : ToolWindowFactory {
                     button("Add") {
                         box.component.selectedItem?.let { it1 -> service.addToWorktree(it1.toString().trim()) }
                         remove(worktreeList)
-                        add(getList())
+                        worktreeList = getList()
+                        add(worktreeList)
                         revalidate()
                         updateUI()
 
@@ -48,11 +61,11 @@ class WorkTreeWindowFactory : ToolWindowFactory {
             }
 
             add(branches)
-            add(buttonSwitch)
+            add(buttons)
             add(worktreeList)
         }
 
-        private fun getList(): JBList<*> {
+        private fun getList(): JBList<String> {
             return JBList(service.worktreeList).apply {
                 addListSelectionListener {
                     service.selected = selectedIndex
