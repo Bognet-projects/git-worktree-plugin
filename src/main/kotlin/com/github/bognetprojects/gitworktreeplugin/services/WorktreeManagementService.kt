@@ -9,7 +9,6 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 
@@ -20,7 +19,6 @@ class WorktreeManagementService(project: Project) {
     private val branchList: List<String>
     private val runtime = Runtime.getRuntime()
     private val projectPath = Paths.get(project.basePath!!)
-    private val os = System.getProperty("os.name")
     private lateinit var paths: List<Path>
 
     init {
@@ -44,7 +42,7 @@ class WorktreeManagementService(project: Project) {
 
     fun removeWorktree() {
         val branchName = worktreeList[selected]
-        executeCommand("git worktree remove $branchName")
+        executeCommand("git worktree remove $branchName --force")
         worktreeList = getWorktreePath()
     }
 
@@ -55,11 +53,9 @@ class WorktreeManagementService(project: Project) {
     }
 
     private fun executeCommand(command: String, wait: Long = 5): List<String> {
-        var commandString = command
         var result: List<String> = listOf()
-        if (!os.lowercase(Locale.getDefault()).startsWith("win")) commandString = arrayOf("/bin/sh", "-c", command).toString()
         try {
-            val process: Process = runtime.exec(commandString, null, projectPath.toFile())
+            val process: Process = runtime.exec(command, null, projectPath.toFile())
             process.waitFor(wait, TimeUnit.SECONDS)
 
             val reader = BufferedReader(InputStreamReader(process.inputStream))
